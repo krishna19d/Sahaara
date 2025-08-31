@@ -61,7 +61,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8 text-center">
+      <div className="max-w-md lg:max-w-lg xl:max-w-xl w-full space-y-8 text-center">
         {/* Status Badge */}
         <div className="flex justify-center">
           {getStatusBadge()}
@@ -99,6 +99,34 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Features Showcase */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-800">What You'll Experience:</h2>
+          
+          <div className="space-y-3 text-sm text-gray-700">
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+              <span><strong>9-Step Personalization:</strong> Age, stress sources, coping styles, personality insights</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-pink-600 rounded-full"></div>
+              <span><strong>3 Science-Based Archetypes:</strong> Performance anxiety, activation deficit, interpersonal distress</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+              <span><strong>9 Ritual Types:</strong> Breathing, movement, visualization, affirmation & more</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+              <span><strong>Mood Dashboard:</strong> Real-time anxiety, motivation & social stress tracking</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
+              <span><strong>Crisis Safety:</strong> Automatic detection with professional resources</span>
+            </div>
+          </div>
+        </div>
+
         {/* Connection Status Info */}
         {authStatus === 'error' && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-left">
@@ -116,7 +144,7 @@ export default function Home() {
         <div className="space-y-4">
           <Link 
             href="/onboard"
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 px-6 rounded-2xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-200 block"
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 px-6 rounded-2xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-200 block text-center"
           >
             Start Anonymous Session
           </Link>

@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Phone, MessageSquare, Heart, ArrowLeft, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { EscalationResponse } from '@/types';
 
-export default function CrisisPage() {
+function CrisisContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [escalationData, setEscalationData] = useState<EscalationResponse | null>(null);
@@ -33,6 +33,16 @@ export default function CrisisPage() {
               country: "IN", 
               name: "Vandrevala Foundation Helpline",
               number: "9999 666 555"
+            },
+            {
+              country: "IN",
+              name: "NIMHANS Helpline",
+              number: "080-46110007"
+            },
+            {
+              country: "IN",
+              name: "iCall Helpline",
+              number: "9152987821"
             }
           ],
           immediate_options: ["call_helpline", "text_helpline", "connect_counselor"]
@@ -67,7 +77,7 @@ export default function CrisisPage() {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto p-4 space-y-6">
+      <div className="max-w-md lg:max-w-lg xl:max-w-xl mx-auto p-4 lg:p-8 space-y-6">
         {/* Main Message */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border-l-4 border-red-500">
           <div className="flex items-start space-x-3">
@@ -201,5 +211,17 @@ export default function CrisisPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CrisisPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      </div>
+    }>
+      <CrisisContent />
+    </Suspense>
   );
 }

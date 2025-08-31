@@ -6,7 +6,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UserPreferences, ConsentFlags } from '@/types';
 
-const MOOD_OPTIONS = ['Calm', 'Uneasy', 'Stressed', 'Panicked', 'Numb'];
+const MOOD_OPTIONS = ['Calm', 'Uneasy', 'Stressed', 'Overwhelmed', 'Panicked', 'Numb'];
+const AGE_OPTIONS = ['15-18', '19-25', '26-30'];
+const STRESS_SOURCE_OPTIONS = ['Studies/Exams', 'Work/Career', 'Relationships', 'Family', 'Health', 'Financial', 'Social Media', 'Future Uncertainty'];
+const COPING_OPTIONS = ['Talking to someone', 'Breathing exercises', 'Physical movement', 'Music/Art', 'Writing/Journaling', 'Being alone', 'Being with others'];
+const PERSONALITY_OPTIONS = ['More Introverted', 'Balanced', 'More Extroverted'];
+const GOAL_OPTIONS = ['Feel calmer', 'More confident', 'Better focus', 'Improved relationships', 'Better sleep', 'Less anxiety'];
 const HOBBY_OPTIONS = ['sketching', 'music', 'reading', 'sports', 'coding', 'cooking', 'dancing', 'writing'];
 const SAFE_PLACE_OPTIONS = ['bedroom', 'rooftop', 'park', 'library', 'home', 'garden', 'café'];
 const LANGUAGE_OPTIONS = [
@@ -28,10 +33,40 @@ export default function OnboardingPage() {
 
   const steps = [
     {
+      title: "What's your age group?",
+      field: 'age_group',
+      type: 'chips',
+      options: AGE_OPTIONS
+    },
+    {
+      title: "What's your main source of stress right now?",
+      field: 'stress_source',
+      type: 'chips',
+      options: STRESS_SOURCE_OPTIONS
+    },
+    {
+      title: "How do you usually prefer to cope with stress?",
+      field: 'coping_style',
+      type: 'chips',
+      options: COPING_OPTIONS
+    },
+    {
+      title: "How would you describe your personality?",
+      field: 'personality',
+      type: 'chips',
+      options: PERSONALITY_OPTIONS
+    },
+    {
+      title: "What's your main goal for feeling better?",
+      field: 'goal',
+      type: 'chips',
+      options: GOAL_OPTIONS
+    },
+    {
       title: "Why did you open Sahaara today?",
       field: 'why',
       type: 'text',
-      placeholder: "e.g., feeling stressed about exams..."
+      placeholder: "e.g., feeling stressed about exams, having a tough day..."
     },
     {
       title: "How are you feeling right now?",
@@ -40,42 +75,30 @@ export default function OnboardingPage() {
       options: MOOD_OPTIONS
     },
     {
-      title: "What's your favorite movie and why?",
-      field: 'movie',
-      type: 'textpair',
-      placeholders: ["Movie title", "What you love about it"]
+      title: "What are your top 3 current challenges?",
+      field: 'problems',
+      type: 'multitext',
+      max: 3,
+      placeholder: "e.g., exam stress, sleep issues, social anxiety..."
     },
     {
-      title: "Favorite song and how it makes you feel?",
-      field: 'song',
-      type: 'textpair',
-      placeholders: ["Song title", "Feeling it gives you"]
-    },
-    {
-      title: "Pick your top 3 hobbies",
+      title: "What are your favorite hobbies or interests?",
       field: 'hobbies',
       type: 'multichips',
       options: HOBBY_OPTIONS,
       max: 3
     },
     {
-      title: "Where do you feel most safe?",
+      title: "Where do you feel most safe and comfortable?",
       field: 'safe_place',
       type: 'chips',
       options: SAFE_PLACE_OPTIONS
     },
     {
-      title: "What's one big dream you have?",
+      title: "What's a personal dream or goal you're working toward?",
       field: 'dream',
       type: 'text',
-      placeholder: "e.g., study abroad, start a business..."
-    },
-    {
-      title: "What are your top 3 current problems?",
-      field: 'problems',
-      type: 'multitext',
-      max: 3,
-      placeholder: "e.g., exam stress, sleep issues..."
+      placeholder: "e.g., starting my own business, getting into my dream college, learning a new skill..."
     },
     {
       title: "Language & Privacy Settings",
@@ -84,7 +107,36 @@ export default function OnboardingPage() {
     }
   ];
 
+  const detectCrisis = (text: string): boolean => {
+    const crisisKeywords = [
+      'hurt myself', 'kill myself', 'suicide', 'end my life', 'not worth living',
+      'want to die', 'better off dead', 'self harm', 'cut myself', 'overdose',
+      'jump off', 'hang myself', 'no point living', 'nothing to live for'
+    ];
+    
+    const lowerText = text.toLowerCase();
+    return crisisKeywords.some(keyword => lowerText.includes(keyword));
+  };
+
   const handleNext = () => {
+    // Crisis detection on text inputs
+    const currentStepData = steps[currentStep];
+    if (currentStepData.type === 'text' || currentStepData.type === 'multitext') {
+      const value = (preferences as any)[currentStepData.field];
+      let textToCheck = '';
+      
+      if (Array.isArray(value)) {
+        textToCheck = value.join(' ');
+      } else {
+        textToCheck = value || '';
+      }
+      
+      if (detectCrisis(textToCheck)) {
+        router.push('/crisis');
+        return;
+      }
+    }
+    
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -98,25 +150,61 @@ export default function OnboardingPage() {
     }
   };
 
+  const handleSkip = () => {
+    // Create a minimal session for skip functionality
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Set up minimal default preferences
+    const defaultPreferences = {
+      age_group: '19-25',
+      stress_source: 'General Stress',
+      coping_style: 'Breathing exercises',
+      personality: 'Balanced',
+      goals: 'Feel calmer',
+      hobbies: 'reading',
+      safe_place: 'home',
+      future_vision: 'Personal growth and wellness',
+      delivery: { language: 'en', voice: 'friendly-peer', tts: true }
+    };
+    
+    const defaultConsent = {
+      sensors: false,
+      retention: 'session-only',
+      tts: true
+    };
+    
+    // Store minimal session data
+    localStorage.setItem('sahaara_session_id', sessionId);
+    localStorage.setItem('sahaara_preferences', JSON.stringify(defaultPreferences));
+    localStorage.setItem('sahaara_consent', JSON.stringify(defaultConsent));
+    localStorage.setItem('sahaara_onboarded', 'true');
+    
+    console.log('Skip: Minimal session created, proceeding to dashboard');
+    router.push('/dashboard');
+  };
+
   const handleSubmit = async () => {
     try {
-      const response = await fetch('/api/onboard', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          preferences,
-          consent
-        })
-      });
+      console.log('Submitting onboarding data:', { preferences, consent });
       
-      const data = await response.json();
+      // Since we're in static export mode, handle onboarding client-side
+      // Generate a simple session ID
+      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      if (data.session_id) {
-        localStorage.setItem('sahaara_session_id', data.session_id);
-        router.push('/dashboard');
-      }
+      // Store preferences and session locally
+      localStorage.setItem('sahaara_session_id', sessionId);
+      localStorage.setItem('sahaara_preferences', JSON.stringify(preferences));
+      localStorage.setItem('sahaara_consent', JSON.stringify(consent));
+      localStorage.setItem('sahaara_onboarded', 'true');
+      
+      console.log('Onboarding data saved locally, proceeding to dashboard');
+      router.push('/dashboard');
+      
     } catch (error) {
       console.error('Onboarding error:', error);
+      // On error, still proceed to dashboard (graceful degradation)
+      alert('There was an issue saving your preferences, but you can continue to the app.');
+      router.push('/dashboard');
     }
   };
 
@@ -141,9 +229,6 @@ export default function OnboardingPage() {
     const value = (preferences as any)[step.field];
     if (!value) return false;
     
-    if (step.type === 'textpair') {
-      return value.title && value.reason;
-    }
     if (step.type === 'multichips' || step.type === 'multitext') {
       return Array.isArray(value) && value.length > 0;
     }
@@ -157,7 +242,7 @@ export default function OnboardingPage() {
       case 'text':
         return (
           <textarea
-            className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none h-32"
+            className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none h-32 text-gray-900 placeholder-gray-500"
             placeholder={step.placeholder}
             value={(preferences as any)[step.field] || ''}
             onChange={(e) => updatePreferences(step.field, e.target.value)}
@@ -173,7 +258,7 @@ export default function OnboardingPage() {
                 className={`p-3 rounded-xl border-2 transition-all ${
                   (preferences as any)[step.field] === option
                     ? 'border-purple-500 bg-purple-50 text-purple-700'
-                    : 'border-gray-200 hover:border-gray-300'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900'
                 }`}
                 onClick={() => updatePreferences(step.field, option)}
               >
@@ -194,7 +279,7 @@ export default function OnboardingPage() {
                   className={`p-3 rounded-xl border-2 transition-all ${
                     selectedHobbies.includes(option)
                       ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900'
                   }`}
                   onClick={() => {
                     const current = selectedHobbies;
@@ -215,27 +300,6 @@ export default function OnboardingPage() {
           </div>
         );
 
-      case 'textpair':
-        const pairValue = (preferences as any)[step.field] || {};
-        return (
-          <div className="space-y-4">
-            <input
-              type="text"
-              className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder={step.placeholders?.[0]}
-              value={pairValue.title || ''}
-              onChange={(e) => updatePreferences(step.field, { ...pairValue, title: e.target.value })}
-            />
-            <input
-              type="text"
-              className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder={step.placeholders?.[1]}
-              value={pairValue.reason || ''}
-              onChange={(e) => updatePreferences(step.field, { ...pairValue, reason: e.target.value })}
-            />
-          </div>
-        );
-
       case 'multitext':
         const problems = (preferences as any)[step.field] || [''];
         return (
@@ -244,7 +308,7 @@ export default function OnboardingPage() {
               <input
                 key={index}
                 type="text"
-                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                 placeholder={`${step.placeholder} (${index + 1})`}
                 value={problem}
                 onChange={(e) => {
@@ -279,7 +343,7 @@ export default function OnboardingPage() {
                     className={`p-3 rounded-xl border-2 transition-all ${
                       preferences.delivery?.language === lang.code
                         ? 'border-purple-500 bg-purple-50 text-purple-700'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900'
                     }`}
                     onClick={() => updatePreferences('delivery', { 
                       ...preferences.delivery, 
@@ -348,7 +412,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4">
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md lg:max-w-lg xl:max-w-xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8 pt-4">
           <button onClick={handleBack} disabled={currentStep === 0}>
@@ -360,9 +424,12 @@ export default function OnboardingPage() {
             <span className="font-semibold text-gray-800">Sahaara</span>
           </div>
           
-          <Link href="/" className="text-gray-600">
+          <button 
+            onClick={handleSkip} 
+            className="text-gray-600 hover:text-gray-800 transition-colors"
+          >
             Skip
-          </Link>
+          </button>
         </div>
 
         {/* Progress */}
