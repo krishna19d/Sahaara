@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { ArrowLeft, ArrowRight, Heart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { UserPreferences, ConsentFlags } from '@/types';
 
 const MOOD_OPTIONS = ['Calm', 'Uneasy', 'Stressed', 'Overwhelmed', 'Panicked', 'Numb'];
@@ -122,13 +121,15 @@ export default function OnboardingPage() {
     // Crisis detection on text inputs
     const currentStepData = steps[currentStep];
     if (currentStepData.type === 'text' || currentStepData.type === 'multitext') {
-      const value = (preferences as any)[currentStepData.field];
+      const value = preferences[currentStepData.field as keyof typeof preferences];
       let textToCheck = '';
       
       if (Array.isArray(value)) {
         textToCheck = value.join(' ');
-      } else {
-        textToCheck = value || '';
+      } else if (typeof value === 'string') {
+        textToCheck = value;
+      } else if (value && typeof value === 'object') {
+        textToCheck = Object.values(value).join(' ');
       }
       
       if (detectCrisis(textToCheck)) {
@@ -208,14 +209,14 @@ export default function OnboardingPage() {
     }
   };
 
-  const updatePreferences = (field: string, value: any) => {
+  const updatePreferences = (field: string, value: string | string[] | object) => {
     setPreferences(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const updateConsent = (field: string, value: any) => {
+  const updateConsent = (field: string, value: boolean | string) => {
     setConsent(prev => ({
       ...prev,
       [field]: value
@@ -226,7 +227,7 @@ export default function OnboardingPage() {
     const step = steps[currentStep];
     if (step.field === 'consent') return true;
     
-    const value = (preferences as any)[step.field];
+    const value = preferences[step.field as keyof typeof preferences];
     if (!value) return false;
     
     if (step.type === 'multichips' || step.type === 'multitext') {
@@ -244,7 +245,7 @@ export default function OnboardingPage() {
           <textarea
             className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none h-32 text-gray-900 placeholder-gray-500"
             placeholder={step.placeholder}
-            value={(preferences as any)[step.field] || ''}
+            value={String(preferences[step.field as keyof typeof preferences] || '')}
             onChange={(e) => updatePreferences(step.field, e.target.value)}
           />
         );
@@ -256,7 +257,7 @@ export default function OnboardingPage() {
               <button
                 key={option}
                 className={`p-3 rounded-xl border-2 transition-all ${
-                  (preferences as any)[step.field] === option
+                  preferences[step.field as keyof typeof preferences] === option
                     ? 'border-purple-500 bg-purple-50 text-purple-700'
                     : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900'
                 }`}
@@ -269,7 +270,7 @@ export default function OnboardingPage() {
         );
 
       case 'multichips':
-        const selectedHobbies = (preferences as any)[step.field] || [];
+        const selectedHobbies = preferences[step.field as keyof typeof preferences] as string[] || [];
         return (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -301,7 +302,7 @@ export default function OnboardingPage() {
         );
 
       case 'multitext':
-        const problems = (preferences as any)[step.field] || [''];
+        const problems = preferences[step.field as keyof typeof preferences] as string[] || [''];
         return (
           <div className="space-y-3">
             {problems.map((problem: string, index: number) => (

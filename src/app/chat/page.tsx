@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Send, ArrowLeft, AlertTriangle, Heart, Wifi, WifiOff } from 'lucide-react';
+import { Send, ArrowLeft, AlertTriangle, Heart, WifiOff } from 'lucide-react';
 import Link from 'next/link';
-import { useErrorHandler } from '@/lib/errorHandler';
 import { generateChatResponse } from '@/lib/ai';
 
 interface Message {
@@ -31,7 +30,6 @@ const getCurrentMood = () => {
 
 export default function ChatPage() {
   const router = useRouter();
-  const { handleAsync, retry } = useErrorHandler();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
@@ -74,7 +72,7 @@ export default function ChatPage() {
     };
     const handleOffline = () => {
       setIsOnline(false);
-      setErrorMessage('You\'re offline. Messages will be saved and sent when you reconnect.');
+      setErrorMessage('You&apos;re offline. Messages will be saved and sent when you reconnect.');
     };
     
     window.addEventListener('online', handleOnline);
@@ -214,7 +212,7 @@ export default function ChatPage() {
         <div className="bg-orange-50 border-b border-orange-200 p-2">
           <div className="max-w-4xl mx-auto flex items-center justify-center space-x-2">
             <WifiOff className="w-4 h-4 text-orange-600" />
-            <span className="text-orange-700 text-sm">You're offline - messages will be saved locally</span>
+            <span className="text-orange-700 text-sm">You&apos;re offline - messages will be saved locally</span>
           </div>
         </div>
       )}
@@ -237,7 +235,7 @@ export default function ChatPage() {
             <div className="flex-1">
               <h3 className="font-medium text-red-800 text-sm">Crisis Support Available</h3>
               <p className="text-red-700 text-xs mt-1">
-                If you're in immediate danger, please call emergency services or these helplines:
+                If you&apos;re in immediate danger, please call emergency services or these helplines:
               </p>
               <div className="flex space-x-4 mt-2 text-xs">
                 <a href="tel:1800-599-0019" className="text-red-600 hover:underline font-medium">

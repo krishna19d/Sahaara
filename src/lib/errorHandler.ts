@@ -1,5 +1,4 @@
 // Enhanced error handling with user-friendly messages and retry mechanisms
-import { ReactNode } from 'react';
 
 export interface AppError {
   code: string;
@@ -27,7 +26,9 @@ export class ErrorHandler {
     };
   }
 
-  static handleNetworkError(error: any): AppError {
+  static handleNetworkError(error: unknown): AppError {
+    const err = error as { status?: number; message?: string };
+    
     if (!navigator.onLine) {
       return this.createError(
         'NETWORK_OFFLINE',
@@ -38,7 +39,7 @@ export class ErrorHandler {
       );
     }
 
-    if (error.status === 403) {
+    if (err.status === 403) {
       return this.createError(
         'API_FORBIDDEN',
         'API access forbidden',
@@ -48,7 +49,7 @@ export class ErrorHandler {
       );
     }
 
-    if (error.status === 429) {
+    if (err.status === 429) {
       return this.createError(
         'API_RATE_LIMIT',
         'Rate limit exceeded',
@@ -60,15 +61,17 @@ export class ErrorHandler {
 
     return this.createError(
       'NETWORK_ERROR',
-      error.message || 'Network request failed',
+      err.message || 'Network request failed',
       'Something went wrong connecting to our servers. Please try again in a moment.',
       'medium',
       true
     );
   }
 
-  static handleDataError(error: any): AppError {
-    if (error.code === 'permission-denied') {
+  static handleDataError(error: unknown): AppError {
+    const err = error as { code?: string; message?: string };
+    
+    if (err.code === 'permission-denied') {
       return this.createError(
         'DATA_PERMISSION_DENIED',
         'Firebase permission denied',
@@ -78,7 +81,7 @@ export class ErrorHandler {
       );
     }
 
-    if (error.code === 'unavailable') {
+    if (err.code === 'unavailable') {
       return this.createError(
         'DATA_UNAVAILABLE',
         'Firebase service unavailable',
@@ -90,27 +93,31 @@ export class ErrorHandler {
 
     return this.createError(
       'DATA_ERROR',
-      error.message || 'Data operation failed',
+      err.message || 'Data operation failed',
       'There was an issue saving your data, but your session will continue normally.',
       'low',
       true
     );
   }
 
-  static handleChatError(error: any): AppError {
+  static handleChatError(error: unknown): AppError {
+    const err = error as { message?: string };
+    
     return this.createError(
       'CHAT_ERROR',
-      error.message || 'Chat request failed',
+      err.message || 'Chat request failed',
       'I\'m having trouble responding right now, but I\'m still here to support you. Try sending your message again.',
       'medium',
       true
     );
   }
 
-  static handleCrisisDetectionError(error: any): AppError {
+  static handleCrisisDetectionError(error: unknown): AppError {
+    const err = error as { message?: string };
+    
     return this.createError(
       'CRISIS_DETECTION_ERROR',
-      error.message || 'Crisis detection failed',
+      err.message || 'Crisis detection failed',
       'I want to make sure you\'re safe. If you\'re in crisis, please reach out to: Kiran 1800-599-0019 or Vandrevala 9999 666 555',
       'critical',
       false
@@ -138,9 +145,8 @@ export function useErrorHandler() {
   ): Promise<T | null> => {
     try {
       return await operation();
-    } catch (error: any) {
+    } catch (error) {
       let appError: AppError;
-      
       switch (errorType) {
         case 'network':
           appError = ErrorHandler.handleNetworkError(error);
@@ -171,7 +177,7 @@ export function useErrorHandler() {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await operation();
-      } catch (error: any) {
+      } catch (error) {
         if (attempt === maxRetries) {
           const appError = ErrorHandler.handleNetworkError(error);
           showError(appError);
@@ -201,7 +207,7 @@ export function isOnline(): boolean {
   return navigator.onLine;
 }
 
-export function getErrorMessage(error: any): string {
+export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
@@ -211,9 +217,10 @@ export function getErrorMessage(error: any): string {
   return 'An unexpected error occurred';
 }
 
-export function shouldRetry(error: any): boolean {
+export function shouldRetry(error: unknown): boolean {
+  const err = error as { status?: number };
   // Don't retry on client errors (4xx) except 429 (rate limit)
-  if (error.status >= 400 && error.status < 500 && error.status !== 429) {
+  if (err.status && err.status >= 400 && err.status < 500 && err.status !== 429) {
     return false;
   }
   

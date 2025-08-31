@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, VolumeX, RotateCcw, Heart } from 'lucide-react';
 
 interface Bubble {
@@ -53,12 +53,13 @@ export default function PopItGame() {
         }, 3000);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bubbles, poppedCount, soundEnabled]);
 
   // Initialize audio context
   const initAudioContext = () => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
     }
     return audioContextRef.current;
   };
@@ -103,13 +104,13 @@ export default function PopItGame() {
       
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.25);
-    } catch (error) {
+    } catch {
       console.log('Audio not available');
     }
   };
 
   // Success sound for completing the grid
-  const playSuccessSound = () => {
+  const playSuccessSound = useCallback(() => {
     try {
       const audioContext = initAudioContext();
       const notes = [262, 330, 392, 523]; // C, E, G, C (major chord)
@@ -132,10 +133,10 @@ export default function PopItGame() {
           oscillator.stop(audioContext.currentTime + 0.5);
         }, index * 150);
       });
-    } catch (error) {
+    } catch {
       console.log('Audio not available');
     }
-  };
+  }, []);
 
   const popBubble = (id: number) => {
     setBubbles(prev => prev.map(bubble => {
@@ -171,7 +172,7 @@ export default function PopItGame() {
         
         // Enhanced scoring logic
         const currentTime = Date.now();
-        let bubblePoints = 10; // Base points
+        const bubblePoints = 10; // Base points
         let streakBonus = 0;
         let rhythmBonus = 0;
         
@@ -451,7 +452,7 @@ export default function PopItGame() {
               🎉 Amazing! You popped them all!
             </p>
             <p className="text-green-600 text-sm mt-1">
-              Take a deep breath. You've earned this moment of calm.
+              Take a deep breath. You&apos;ve earned this moment of calm.
             </p>
             <div className="flex justify-center gap-1 mt-2">
               {Array.from({ length: 5 }).map((_, i) => (

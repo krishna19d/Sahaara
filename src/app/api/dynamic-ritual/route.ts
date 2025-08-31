@@ -118,7 +118,7 @@ FORMAT RESPONSE AS JSON:
             timestamp: Date.now()
           });
         }
-      } catch (parseError) {
+      } catch {
         console.warn('Failed to parse Gemini response as JSON, using fallback');
       }
     } catch (geminiError) {
@@ -153,11 +153,12 @@ FORMAT RESPONSE AS JSON:
 
 function generateLocalRitual(
   archetype: string, 
-  preferences: any = {}, 
-  currentMood: any = {}
-): any {
+  preferences: Record<string, unknown> = {}, 
+  _currentMood: Record<string, number> = {}
+): Record<string, unknown> {
   const safePlace = preferences.safe_place || 'a peaceful place';
-  const hobby = preferences.hobbies?.[0] || 'something you enjoy';
+  const hobbies = Array.isArray(preferences.hobbies) ? preferences.hobbies : [];
+  const hobby = hobbies[0] || 'something you enjoy';
   const dream = preferences.dream || 'your goals';
   
   const templates = {

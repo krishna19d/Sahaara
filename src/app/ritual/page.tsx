@@ -669,7 +669,7 @@ function RitualContent() {
                 
                 {ritual.visual_artifact && (
                   <div className="bg-white rounded-xl p-4 border border-green-200">
-                    <p className="text-gray-700 italic">"{ritual.visual_artifact}"</p>
+                    <p className="text-gray-700 italic">&quot;{ritual.visual_artifact}&quot;</p>
                   </div>
                 )}
                 

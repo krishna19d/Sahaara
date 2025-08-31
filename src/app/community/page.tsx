@@ -8,10 +8,7 @@ import {
   Heart, 
   MessageCircle, 
   Shield, 
-  Star,
-  Clock,
   UserCheck,
-  TrendingUp,
   PlusCircle
 } from 'lucide-react';
 import Link from 'next/link';
@@ -330,7 +327,7 @@ export default function CommunityPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    What's on your mind?
+                    What&apos;s on your mind?
                   </label>
                   <textarea
                     value={newPostContent}
@@ -380,7 +377,7 @@ export default function CommunityPage() {
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• Be kind and supportive to others</li>
                 <li>• Share experiences, not advice as facts</li>
-                <li>• Respect everyone's journey and privacy</li>
+                <li>• Respect everyone&apos;s journey and privacy</li>
                 <li>• No sharing of personal contact information</li>
                 <li>• Report any concerning content to moderators</li>
               </ul>

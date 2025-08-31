@@ -7,7 +7,7 @@ import { RitualOutput } from '@/types';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { session_id, state_vector, preferences, delivery } = body;
+    const { session_id, state_vector } = body;
 
     if (!session_id) {
       return NextResponse.json(

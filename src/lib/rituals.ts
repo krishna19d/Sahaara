@@ -111,9 +111,9 @@ export function classifyArchetype(
   
   // Return archetype with highest score, default to performance_anxiety if tie
   const maxScore = Math.max(...Object.values(scores));
-  const topArchetype = Object.entries(scores).find(([_, score]) => score === maxScore)?.[0];
+  const topArchetype = Object.entries(scores).find(([, score]) => score === maxScore)?.[0];
   
-  return (topArchetype as any) || 'performance_anxiety';
+  return (topArchetype as 'performance_anxiety' | 'activation_deficit' | 'interpersonal_distress') || 'performance_anxiety';
 }
 
 export function getRitualByArchetype(archetype: string): PregenRitual | null {

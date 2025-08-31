@@ -1,7 +1,7 @@
 import { EscalationResponse } from '@/types';
 
 // Crisis detection and escalation system
-export function createEscalationResponse(userInput: string): EscalationResponse {
+export function createEscalationResponse(_userInput: string): EscalationResponse {
   return {
     escalation: true,
     message_text: "I'm really sorry you're feeling this way. This sounds serious — please consider contacting local emergency services or a 24/7 crisis helpline now. I can provide a helpline or help connect you to a counselor if you want.",

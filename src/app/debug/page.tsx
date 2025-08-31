@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function DebugPage() {
   const [debugInfo, setDebugInfo] = useState({
@@ -25,7 +26,7 @@ export default function DebugPage() {
       try {
         localStorage.setItem('test', 'test');
         localStorage.removeItem('test');
-      } catch (e) {
+      } catch {
         localStorageTest = 'Not Available';
       }
 
@@ -81,7 +82,7 @@ export default function DebugPage() {
         </div>
       </div>
       <div style={{ marginTop: '20px' }}>
-        <a href="/" style={{ color: 'blue', textDecoration: 'underline' }}>← Back to Main App</a>
+        <Link href="/" style={{ color: 'blue', textDecoration: 'underline' }}>← Back to Main App</Link>
       </div>
     </div>
   );

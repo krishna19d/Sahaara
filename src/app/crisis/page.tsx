@@ -1,14 +1,13 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Phone, MessageSquare, Heart, ArrowLeft, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { EscalationResponse } from '@/types';
 
 function CrisisContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [escalationData, setEscalationData] = useState<EscalationResponse | null>(null);
 
   useEffect(() => {
@@ -84,7 +83,7 @@ function CrisisContent() {
             <Heart className="w-8 h-8 text-red-600 flex-shrink-0 mt-1" />
             <div>
               <h1 className="text-xl font-bold text-gray-800 mb-3">
-                We're here for you
+                We&apos;re here for you
               </h1>
               <p className="text-gray-700 leading-relaxed">
                 {escalationData.message_text}
@@ -206,7 +205,7 @@ function CrisisContent() {
             href="/dashboard"
             className="text-gray-600 hover:text-gray-800 transition-colors text-sm"
           >
-            Return to Sahaara when you're ready →
+            Return to Sahaara when you&apos;re ready →
           </Link>
         </div>
       </div>

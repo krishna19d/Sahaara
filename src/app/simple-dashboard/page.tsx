@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function SimpleDashboard() {
   const [responses, setResponses] = useState<Record<number, string>>({});
@@ -46,13 +47,13 @@ export default function SimpleDashboard() {
       } else {
         setChatHistory(prev => [...prev, { 
           role: 'assistant', 
-          content: 'I apologize, but I\'m having trouble connecting right now. Try asking about breathing exercises or simple coping strategies.' 
+          content: 'I apologize, but I&apos;m having trouble connecting right now. Try asking about breathing exercises or simple coping strategies.' 
         }]);
       }
-    } catch (error) {
+    } catch {
       setChatHistory(prev => [...prev, { 
         role: 'assistant', 
-        content: 'Here\'s a simple breathing exercise: Breathe in for 4 counts, hold for 4 counts, breathe out for 6 counts. Repeat 3 times.' 
+        content: 'Here&apos;s a simple breathing exercise: Breathe in for 4 counts, hold for 4 counts, breathe out for 6 counts. Repeat 3 times.' 
       }]);
     }
   };
@@ -121,7 +122,7 @@ export default function SimpleDashboard() {
           fontSize: '14px'
         }}>
           {mood.stress > 7 && "High stress detected. Try the breathing exercise below."}
-          {mood.stress >= 4 && mood.stress <= 7 && "Moderate stress levels. You're managing well."}
+          {mood.stress >= 4 && mood.stress <= 7 && "Moderate stress levels. You&apos;re managing well."}
           {mood.stress < 4 && "Low stress levels. Great job maintaining your calm!"}
         </div>
       </div>
@@ -198,7 +199,7 @@ export default function SimpleDashboard() {
         }}>
           {chatHistory.length === 0 && (
             <div style={{ color: '#666', fontStyle: 'italic' }}>
-              Start a conversation! Ask about breathing exercises, coping strategies, or how you're feeling.
+              Start a conversation! Ask about breathing exercises, coping strategies, or how you&apos;re feeling.
             </div>
           )}
           {chatHistory.map((msg, index) => (
@@ -245,13 +246,13 @@ export default function SimpleDashboard() {
       </div>
 
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        <a href="/simple" style={{ color: '#667eea', textDecoration: 'none' }}>
+        <Link href="/simple" style={{ color: '#667eea', textDecoration: 'none' }}>
           ← Back to Setup
-        </a>
+        </Link>
         {' | '}
-        <a href="/" style={{ color: '#667eea', textDecoration: 'none' }}>
+        <Link href="/" style={{ color: '#667eea', textDecoration: 'none' }}>
           Full Version
-        </a>
+        </Link>
       </div>
     </div>
   );

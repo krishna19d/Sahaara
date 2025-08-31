@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, Activity, MessageCircle, Settings, Play, BarChart3, Users } from 'lucide-react';
+import { Heart, Activity, MessageCircle, Settings, BarChart3, Users } from 'lucide-react';
 import Link from 'next/link';
 import MotivationWall from '@/components/MotivationWall';
 
@@ -324,7 +324,7 @@ export default function DashboardPage() {
 
         {/* Today's Insight */}
         <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 space-y-4">
-          <h3 className="font-semibold text-gray-800 mb-2">Today's Insight</h3>
+          <h3 className="font-semibold text-gray-800 mb-2">Today&apos;s Insight</h3>
           <div className="space-y-3">
             <div className="bg-white/70 rounded-xl p-4">
               <h4 className="text-sm font-medium text-purple-800 mb-1">Affirmation</h4>
@@ -333,7 +333,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="bg-white/70 rounded-xl p-4">
-              <h4 className="text-sm font-medium text-pink-800 mb-1">Today's Nudge</h4>
+              <h4 className="text-sm font-medium text-pink-800 mb-1">Today&apos;s Nudge</h4>
               <p className="text-gray-700 text-sm leading-relaxed">
                 {dailyContent.nudge}
               </p>

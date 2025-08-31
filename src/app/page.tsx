@@ -101,7 +101,7 @@ export default function Home() {
 
         {/* Features Showcase */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800">What You'll Experience:</h2>
+          <h2 className="text-lg font-semibold text-gray-800">What You&apos;ll Experience:</h2>
           
           <div className="space-y-3 text-sm text-gray-700">
             <div className="flex items-center space-x-3">

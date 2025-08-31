@@ -49,6 +49,7 @@ export default function BreathingAnimation({
     };
 
     // Start countdown timer
+    // eslint-disable-next-line prefer-const
     interval = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {

@@ -5,7 +5,7 @@ import { StateVector } from '@/types';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { session_id, stress, activation, isolation, note } = body;
+    const { session_id, stress, activation, isolation } = body;
 
     if (!session_id) {
       return NextResponse.json(

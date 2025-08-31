@@ -4,7 +4,7 @@ import { saveArtifact, getUserSession } from '@/lib/session';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { session_id, text, user_action, ritual_type } = body;
+    const { session_id, text, user_action } = body;
 
     if (!session_id || !text) {
       return NextResponse.json(

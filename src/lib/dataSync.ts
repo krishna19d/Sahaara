@@ -1,12 +1,4 @@
 // Enhanced data persistence with localStorage and export/import capabilities (100% FREE)
-interface UserData {
-  preferences: any;
-  consent: any;
-  sessionStats: any;
-  currentMood: any;
-  chatHistory: Array<{ role: string; content: string; timestamp: number }>;
-}
-
 interface SyncOptions {
   retainData: boolean;
   enableExport: boolean;
@@ -31,7 +23,7 @@ export class DataSyncManager {
 
       this.sessionId = this.generateSessionId();
       console.log('DataSync: Using localStorage with export capabilities (FREE)');
-    } catch (error) {
+    } catch {
       console.log('DataSync: Using session-only storage');
       this.syncOptions = { retainData: false, enableExport: true };
     }
@@ -41,7 +33,7 @@ export class DataSyncManager {
     return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   }
 
-  async saveUserData(key: string, data: any): Promise<void> {
+  async saveUserData(key: string, data: unknown): Promise<void> {
     try {
       const storageKey = this.syncOptions.retainData ? key : `session_${key}`;
       localStorage.setItem(storageKey, JSON.stringify(data));
@@ -59,7 +51,7 @@ export class DataSyncManager {
     }
   }
 
-  async getUserData(key: string): Promise<any> {
+  async getUserData(key: string): Promise<unknown> {
     try {
       // Try persistent storage first, then session storage
       const persistentData = localStorage.getItem(key);
@@ -95,7 +87,7 @@ export class DataSyncManager {
   // Export user data as JSON file (FREE backup solution)
   async exportUserData(): Promise<void> {
     try {
-      const allData: Record<string, any> = {};
+      const allData: Record<string, unknown> = {};
       const keys = Object.keys(localStorage).filter(k => 
         k.startsWith('sahaara_') && !k.endsWith('_meta')
       );
@@ -103,7 +95,7 @@ export class DataSyncManager {
       keys.forEach(key => {
         try {
           allData[key] = JSON.parse(localStorage.getItem(key) || '{}');
-        } catch (e) {
+        } catch {
           allData[key] = localStorage.getItem(key);
         }
       });
@@ -165,7 +157,7 @@ export class DataSyncManager {
       const percentage = (used / available) * 100;
       
       return { used, available, percentage };
-    } catch (error) {
+    } catch {
       return { used: 0, available: 0, percentage: 0 };
     }
   }
@@ -190,7 +182,7 @@ export class DataSyncManager {
 export const dataSync = new DataSyncManager();
 
 // Helper functions for easy usage
-export const saveUserData = (key: string, data: any) => dataSync.saveUserData(key, data);
+export const saveUserData = (key: string, data: unknown) => dataSync.saveUserData(key, data);
 export const getUserData = (key: string) => dataSync.getUserData(key);
 export const clearUserData = (key?: string) => dataSync.clearUserData(key);
 export const exportUserData = () => dataSync.exportUserData();

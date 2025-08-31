@@ -1,16 +1,28 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { dataSync, exportUserData, clearUserData, getStorageInfo } from '@/lib/dataSync';
 
 export default function SettingsPage() {
-  const [storageInfo, setStorageInfo] = useState(getStorageInfo());
+  const [storageInfo, setStorageInfo] = useState({ used: 0, available: 0, percentage: 0 });
   const [importing, setImporting] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setStorageInfo(getStorageInfo());
+  }, []);
+
+  const updateStorageInfo = () => {
+    if (isClient) {
+      setStorageInfo(getStorageInfo());
+    }
+  };
   
   const handleExport = async () => {
     try {
       await exportUserData();
       alert('Data exported successfully! Check your downloads folder.');
-    } catch (error) {
+    } catch {
       alert('Export failed. Please try again.');
     }
   };
@@ -28,7 +40,7 @@ export default function SettingsPage() {
       } else {
         alert('Import failed. Please check the file format.');
       }
-    } catch (error) {
+    } catch {
       alert('Import failed. Please try again.');
     } finally {
       setImporting(false);
@@ -38,13 +50,13 @@ export default function SettingsPage() {
   const handleClearAll = async () => {
     if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
       await clearUserData();
+      updateStorageInfo();
       alert('All data cleared successfully.');
-      window.location.reload();
     }
   };
 
   const refreshStorage = () => {
-    setStorageInfo(getStorageInfo());
+    updateStorageInfo();
   };
 
   const persistence = dataSync.getDataPersistence();
@@ -80,12 +92,12 @@ export default function SettingsPage() {
             <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
               <div 
                 className="bg-purple-600 h-2 rounded-full transition-all duration-300" 
-                style={{ width: `${Math.min(storageInfo.percentage, 100)}%` }}
+                style={{ width: isClient ? `${Math.min(storageInfo.percentage, 100)}%` : '0%' }}
               ></div>
             </div>
             <p className="text-sm text-gray-600">
-              {(storageInfo.used / 1024).toFixed(1)} KB used of ~5MB available 
-              ({storageInfo.percentage.toFixed(1)}%)
+              {isClient ? (storageInfo.used / 1024).toFixed(1) : '0.0'} KB used of ~5MB available 
+              ({isClient ? storageInfo.percentage.toFixed(1) : '0.0'}%)
             </p>
           </div>
 

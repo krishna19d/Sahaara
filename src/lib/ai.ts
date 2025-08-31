@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { ErrorHandler } from './errorHandler';
 
 // Initialize Gemini AI (with mobile browser compatibility)
 let genAI: GoogleGenerativeAI | null = null;
@@ -53,7 +52,7 @@ interface ConversationContext {
 }
 
 // Analyze question complexity and determine appropriate response length
-function analyzeQuestionDepth(message: string, context: ConversationContext): {
+function analyzeQuestionDepth(message: string, _context: ConversationContext): {
   depth: 'simple' | 'moderate' | 'complex';
   targetWords: number;
   responseType: string;
@@ -254,7 +253,7 @@ const responseTemplates = {
 function analyzeMessageContext(message: string, history: Array<{ role: string; content: string }> = []): ConversationContext {
   const lowercaseMessage = message.toLowerCase();
   let mood: ConversationContext['mood'] = 'neutral';
-  let topics: string[] = [];
+  const topics: string[] = [];
 
   // Specific stress/anxiety keywords (including common typos)
   if (lowercaseMessage.includes('stress') || lowercaseMessage.includes('anxiety') || lowercaseMessage.includes('anxious') || 
@@ -430,27 +429,11 @@ export async function detectCrisis(message: string): Promise<boolean> {
   return riskScore >= 4;
 }
 
-// Simple crisis detection fallback
-function detectCrisisSimple(message: string): boolean {
-  const lowercaseMessage = message.toLowerCase();
-  return CRISIS_KEYWORDS.some(keyword => lowercaseMessage.includes(keyword));
-}
-
 // Helper functions to get user data from localStorage (browser-safe)
 function getUserPreferences() {
   if (typeof window === 'undefined') return {};
   try {
     const stored = localStorage.getItem('sahaara_preferences');
-    return stored ? JSON.parse(stored) : {};
-  } catch {
-    return {};
-  }
-}
-
-function getUserConsent() {
-  if (typeof window === 'undefined') return {};
-  try {
-    const stored = localStorage.getItem('sahaara_consent');
     return stored ? JSON.parse(stored) : {};
   } catch {
     return {};
@@ -468,7 +451,7 @@ function getCurrentMood() {
 }
 
 // Build comprehensive user context string for AI
-function buildUserContextString(preferences: any, currentMood: any): string {
+function buildUserContextString(preferences: Record<string, unknown>, currentMood: Record<string, number>): string {
   const parts = [];
   
   if (preferences.age_group) {
@@ -499,13 +482,17 @@ function buildUserContextString(preferences: any, currentMood: any): string {
     parts.push(`Recent mood state: ${preferences.mood}`);
   }
   
-  if (preferences.problems && preferences.problems.length > 0) {
-    parts.push(`Current challenges: ${preferences.problems.filter((p: string) => p.trim()).join(', ')}`);
+  if (preferences.problems && Array.isArray(preferences.problems)) {
+    const validProblems = preferences.problems.filter((p: unknown) => 
+      typeof p === 'string' && (p as string).trim()
+    );
+    if (validProblems.length > 0) {
+      parts.push(`Current challenges: ${validProblems.join(', ')}`);
+    }
   }
   
-  if (preferences.hobbies && preferences.hobbies.length > 0) {
-    const hobbiesArray = Array.isArray(preferences.hobbies) ? preferences.hobbies : [preferences.hobbies];
-    parts.push(`Hobbies/interests: ${hobbiesArray.join(', ')}`);
+  if (preferences.hobbies && Array.isArray(preferences.hobbies)) {
+    parts.push(`Hobbies/interests: ${preferences.hobbies.join(', ')}`);
   }
   
   if (preferences.safe_place) {
@@ -516,8 +503,11 @@ function buildUserContextString(preferences: any, currentMood: any): string {
     parts.push(`Personal dream/goal: ${preferences.dream}`);
   }
   
-  if (preferences.delivery?.language) {
-    parts.push(`Preferred language: ${preferences.delivery.language}`);
+  if (preferences.delivery && typeof preferences.delivery === 'object') {
+    const delivery = preferences.delivery as { language?: string };
+    if (delivery.language) {
+      parts.push(`Preferred language: ${delivery.language}`);
+    }
   }
   
   if (currentMood.stress !== undefined) {
@@ -539,15 +529,15 @@ function buildUserContextString(preferences: any, currentMood: any): string {
 function generatePersonalizedLocalResponse(
   message: string, 
   context: ConversationContext, 
-  userPreferences: any, 
-  currentMood: any
+  userPreferences: Record<string, unknown>, 
+  currentMood: Record<string, number>
 ): string {
   const depthAnalysis = analyzeQuestionDepth(message, context);
   const isMobile = isMobileDevice();
   
   // Special handling for preference questions
   const lowerMessage = message.toLowerCase();
-  if (lowerMessage.includes('preferences') || lowerMessage.includes('my app preferences')) {
+  if (lowerMessage.includes('do you know my preferences') || lowerMessage.includes('what do you know about me')) {
     if (userPreferences && Object.keys(userPreferences).length > 0) {
       const prefDetails = [];
       if (userPreferences.age_group) prefDetails.push(`age group: ${userPreferences.age_group}`);
@@ -575,21 +565,21 @@ function generatePersonalizedLocalResponse(
   // Adjust response based on depth analysis
   if (depthAnalysis.depth === 'complex') {
     // Add more detailed guidance for complex questions
-    if (context.topics.includes('stress_anxiety') && userPreferences.coping_style) {
+    if (context.topics.includes('stress_anxiety') && typeof userPreferences.coping_style === 'string') {
       personalizedResponse += ` Since you prefer ${userPreferences.coping_style.toLowerCase()}, try combining that with progressive muscle relaxation. ${isMobile ? 'Use your phone\'s timer for 2-minute sessions.' : 'Also consider setting small daily boundaries to protect your energy.'}`;
-    } else if (context.topics.includes('achievement_pressure') && userPreferences.goal) {
+    } else if (context.topics.includes('achievement_pressure') && typeof userPreferences.goal === 'string') {
       personalizedResponse += ` Your goal to ${userPreferences.goal.toLowerCase()} is meaningful. Break it into weekly milestones, celebrate small wins, and remember that setbacks are learning opportunities, not failures.`;
     } else if (context.topics.includes('family_relationships')) {
       personalizedResponse += ` Family dynamics are complex. Consider having a calm conversation about your feelings, setting gentle boundaries, and finding trusted friends or mentors for additional support.`;
     }
   } else if (depthAnalysis.depth === 'moderate') {
     // Add one personalization element for moderate questions
-    if (userPreferences.safe_place && (context.topics.includes('stress_anxiety') || context.topics.includes('sadness_depression'))) {
+    if (typeof userPreferences.safe_place === 'string' && (context.topics.includes('stress_anxiety') || context.topics.includes('sadness_depression'))) {
       personalizedResponse = personalizedResponse.replace(
         /comfortable place|safe place|peaceful place/gi,
         userPreferences.safe_place
       );
-    } else if (userPreferences.hobbies && userPreferences.hobbies.length > 0) {
+    } else if (Array.isArray(userPreferences.hobbies) && userPreferences.hobbies.length > 0) {
       const favoriteHobby = userPreferences.hobbies[0];
       personalizedResponse += ` Try spending 15 minutes on ${favoriteHobby} today.`;
     }
@@ -610,8 +600,8 @@ function generatePersonalizedLocalResponse(
 export async function generateChatResponse(
   message: string,
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = [],
-  userPreferences?: any,
-  currentMood?: any
+  userPreferences?: Record<string, unknown>,
+  currentMood?: Record<string, number>
 ): Promise<{ response: string; isCrisis: boolean }> {
   try {
     // Validate and limit input message length
@@ -793,7 +783,7 @@ Sahaara:`;
 
 // Generate personalized daily affirmations and nudges
 export async function generateDailyContent(
-  userPreferences: any = {}
+  userPreferences: Record<string, unknown> = {}
 ): Promise<{ affirmation: string; nudge: string }> {
   // Use provided preferences or get from storage as fallback
   let effectivePreferences = userPreferences;
@@ -851,7 +841,7 @@ Nudge: [specific micro-action based on their preferences/hobbies/goals]`;
 }
 
 // Generate personalized fallback daily content
-function generatePersonalizedDailyFallback(userPreferences: any): { affirmation: string; nudge: string } {
+function generatePersonalizedDailyFallback(userPreferences: Record<string, unknown>): { affirmation: string; nudge: string } {
   // Enhanced fallback content with variety
   const affirmations = [
     'You have the strength to handle whatever today brings your way.',
@@ -884,7 +874,7 @@ function generatePersonalizedDailyFallback(userPreferences: any): { affirmation:
   let selectedNudge = nudges[Math.floor(Math.random() * nudges.length)];
 
   // Customize based on user data
-  if (userPreferences.goal) {
+  if (typeof userPreferences.goal === 'string') {
     if (userPreferences.goal.includes('confident')) {
       selectedAffirmation = 'You have unique strengths and abilities that make you valuable.';
     } else if (userPreferences.goal.includes('calmer')) {
@@ -894,12 +884,12 @@ function generatePersonalizedDailyFallback(userPreferences: any): { affirmation:
     }
   }
 
-  if (userPreferences.hobbies && userPreferences.hobbies.length > 0) {
+  if (Array.isArray(userPreferences.hobbies) && userPreferences.hobbies.length > 0) {
     const hobby = userPreferences.hobbies[0];
     selectedNudge = `Spend 5 minutes doing something related to ${hobby} that brings you joy.`;
   }
 
-  if (userPreferences.coping_style) {
+  if (typeof userPreferences.coping_style === 'string') {
     if (userPreferences.coping_style.includes('Breathing')) {
       selectedNudge = 'Take three conscious, slow breaths and notice how your body feels.';
     } else if (userPreferences.coping_style.includes('movement')) {

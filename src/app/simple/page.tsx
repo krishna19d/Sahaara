@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function SimplePage() {
   const [step, setStep] = useState(1);
@@ -146,9 +147,9 @@ export default function SimplePage() {
       )}
 
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        <a href="/" style={{ color: '#667eea', textDecoration: 'none' }}>
+        <Link href="/" style={{ color: '#667eea', textDecoration: 'none' }}>
           ← Back to Full Version
-        </a>
+        </Link>
       </div>
     </div>
   );
